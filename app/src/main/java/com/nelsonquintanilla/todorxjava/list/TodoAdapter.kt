@@ -7,8 +7,17 @@ import androidx.recyclerview.widget.RecyclerView
 import com.nelsonquintanilla.todorxjava.R
 import com.nelsonquintanilla.todorxjava.databinding.AdapterSectionHeaderBinding
 import com.nelsonquintanilla.todorxjava.databinding.AdapterTodoItemBinding
+import com.nelsonquintanilla.todorxjava.model.TaskItem
+import io.reactivex.rxjava3.subjects.PublishSubject
 
 class TodoAdapter : ListAdapter<TodoListItem, RecyclerView.ViewHolder>(TodoDiffUtil()) {
+
+    private val taskClickSubject = PublishSubject.create<TaskItem>()
+    private val taskToggledSubject = PublishSubject.create<Pair<TaskItem, Boolean>>()
+
+    // Hide the details of the subjects from outside consumers so they don't have the opportunity to push unexpected objects into the stream
+    val taskClickStream = taskClickSubject.hide() // Observable
+    val taskToggledStream = taskToggledSubject.hide() // Observable
 
     override fun getItemViewType(position: Int): Int {
         return getItem(position).viewType
@@ -51,7 +60,11 @@ class TodoAdapter : ListAdapter<TodoListItem, RecyclerView.ViewHolder>(TodoDiffU
 
             is TodoViewHolder -> {
                 if (item is TodoListItem.TaskListItem) {
-                    holder.bind(item.taskItem)
+                    holder.bind(
+                        taskItem = item.taskItem,
+                        taskClickSubject = taskClickSubject,
+                        taskToggledSubject = taskToggledSubject,
+                    )
                 }
             }
         }
