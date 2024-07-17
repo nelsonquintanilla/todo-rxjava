@@ -21,7 +21,7 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:text="Hello this is a long sentance that I am writing and I'm hoping that by the end of it we'll see some sort of wrapping but truth be told I'm not confident that we will because it will trully take a loooong sentence and I don't think this one is really long enough but I suppose we'll see."/>
 
-    <com.google.android.material.materialswitch.MaterialSwitch
+    <androidx.appcompat.widget.SwitchCompat
         android:id="@+id/task_done"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
