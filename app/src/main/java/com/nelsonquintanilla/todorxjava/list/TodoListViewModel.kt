@@ -3,7 +3,7 @@ package com.nelsonquintanilla.todorxjava.list
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.nelsonquintanilla.todorxjava.model.TaskItem
-import com.nelsonquintanilla.todorxjava.repository.RoomTaskRepository
+import com.nelsonquintanilla.todorxjava.repository.RoomTaskRepository.Companion.INVALID_ID
 import com.nelsonquintanilla.todorxjava.repository.TaskRepository
 import io.reactivex.rxjava3.core.Scheduler
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -21,7 +21,9 @@ class TodoListViewModel(
 
     private val disposables = CompositeDisposable()
     private val taskClicks = PublishSubject.create<TaskItem>()
-    private val taskDoneToggles = PublishSubject.create<Pair<TaskItem, Boolean>>() // Observable listening for a tap on any of the task items
+    private val taskDoneToggles =
+        PublishSubject.create<Pair<TaskItem, Boolean>>() // Observable listening for a tap on any of the task items
+    private val addClicks = PublishSubject.create<Unit>()
 
     // Int represents the id of the task item to be edited. It's best practice to pass around the
     // smallest piece of data possible between 2 activities so that the maximum amount of information
@@ -66,8 +68,16 @@ class TodoListViewModel(
             // aren't started by quickly tapping on a task.
             .throttleFirst(1, TimeUnit.SECONDS, computationScheduler)
             .subscribe {
-                val id = it.id ?: RoomTaskRepository.INVALID_ID
+                val id = it.id ?: INVALID_ID
                 showEditTaskLiveData.postValue(id)
+            }
+            .addTo(disposables)
+
+        // Indicate that the add button was clicked and show Edit Task Activity
+        addClicks
+            .throttleFirst(1, TimeUnit.SECONDS, computationScheduler)
+            .subscribe {
+                showEditTaskLiveData.postValue(INVALID_ID)
             }
             .addTo(disposables)
     }
@@ -79,6 +89,10 @@ class TodoListViewModel(
 
     fun taskDoneToggled(taskItem: TaskItem, on: Boolean) {
         taskDoneToggles.onNext(Pair(taskItem, on))
+    }
+
+    fun addClicked() {
+        addClicks.onNext(Unit)
     }
 
     override fun onCleared() {

@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.jakewharton.rxbinding4.view.clicks
 import com.nelsonquintanilla.todorxjava.database.TaskRoomDatabase
 import com.nelsonquintanilla.todorxjava.databinding.ActivityTodoListBinding
 import com.nelsonquintanilla.todorxjava.edit.EditTaskActivity
@@ -32,6 +33,10 @@ class TodoListActivity : AppCompatActivity() {
             val repository = RoomTaskRepository(TaskRoomDatabase.fetchDatabase(this))
             TodoListViewModel(repository, Schedulers.io(), Schedulers.computation())
         }
+
+        binding.addButton.clicks()
+            .subscribe { viewModel.addClicked() }
+            .addTo(disposables)
 
         viewModel.listItemsLiveData
             .observe(this, Observer(adapter::submitList))
