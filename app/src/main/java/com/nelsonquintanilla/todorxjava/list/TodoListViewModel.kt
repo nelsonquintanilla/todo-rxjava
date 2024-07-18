@@ -4,6 +4,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.nelsonquintanilla.todorxjava.model.TaskItem
 import com.nelsonquintanilla.todorxjava.repository.RoomTaskRepository
+import com.nelsonquintanilla.todorxjava.repository.TaskRepository
 import io.reactivex.rxjava3.core.Scheduler
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
@@ -11,22 +12,22 @@ import io.reactivex.rxjava3.subjects.PublishSubject
 import java.util.concurrent.TimeUnit
 
 class TodoListViewModel(
-    repository: RoomTaskRepository,
+    repository: TaskRepository,
     backgroundScheduler: Scheduler,
     // Best practice: pass in dedicated Scheduler to use for timing tasks, that way it's possible to
     // advance time manually using a TestScheduler in unit tests
     computationScheduler: Scheduler,
 ) : ViewModel() {
 
-    val listItemsLiveData = MutableLiveData<List<TodoListItem>>()
+    private val disposables = CompositeDisposable()
+    private val taskClicks = PublishSubject.create<TaskItem>()
+    private val taskDoneToggles = PublishSubject.create<Pair<TaskItem, Boolean>>() // Observable listening for a tap on any of the task items
+
     // Int represents the id of the task item to be edited. It's best practice to pass around the
     // smallest piece of data possible between 2 activities so that the maximum amount of information
     // an intent can carry is not exceeded.
     val showEditTaskLiveData = MutableLiveData<Int>()
-
-    private val disposables = CompositeDisposable()
-    private val taskClicks = PublishSubject.create<TaskItem>()
-    private val taskDoneToggles = PublishSubject.create<Pair<TaskItem, Boolean>>() // Observable listening for a tap on any of the task items
+    val listItemsLiveData = MutableLiveData<List<TodoListItem>>()
 
     init {
         repository
