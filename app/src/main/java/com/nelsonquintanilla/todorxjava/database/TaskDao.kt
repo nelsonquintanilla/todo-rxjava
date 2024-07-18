@@ -1,6 +1,7 @@
 package com.nelsonquintanilla.todorxjava.database
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -28,4 +29,7 @@ interface TaskDao {
     // all of the task items in the database.
     @Query("SELECT * FROM TaskItem ORDER BY addedDate")
     fun taskStream(): Observable<List<TaskItem>>
+
+    @Delete
+    fun deleteTask(taskItem: TaskItem): Single<Int>
 }

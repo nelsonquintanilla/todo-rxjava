@@ -17,7 +17,8 @@ class TodoAdapter : ListAdapter<TodoListItem, RecyclerView.ViewHolder>(TodoDiffU
 
     // Hide the details of the subjects from outside consumers so they don't have the opportunity to push unexpected objects into the stream
     val taskClickStream = taskClickSubject.hide() // Observable corresponding to the PublishSubject
-    val taskToggledStream = taskToggledSubject.hide() // Observable corresponding to the PublishSubject
+    val taskToggledStream =
+        taskToggledSubject.hide() // Observable corresponding to the PublishSubject
 
     override fun getItemViewType(position: Int): Int {
         return getItem(position).viewType
@@ -68,5 +69,9 @@ class TodoAdapter : ListAdapter<TodoListItem, RecyclerView.ViewHolder>(TodoDiffU
                 }
             }
         }
+    }
+
+    fun getListItem(position: Int): TodoListItem {
+        return getItem(position)
     }
 }

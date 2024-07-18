@@ -9,4 +9,5 @@ interface TaskRepository {
     fun insertTask(taskItem: TaskItem): Single<Long>
     fun getTask(id: Int): Maybe<TaskItem>
     fun taskStream(): Observable<List<TaskItem>>
+    fun deleteTask(taskItem: TaskItem): Single<Int>
 }

@@ -3,6 +3,7 @@ package com.nelsonquintanilla.todorxjava.list
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.jakewharton.rxbinding4.view.clicks
 import com.nelsonquintanilla.todorxjava.database.TaskRoomDatabase
@@ -33,6 +34,13 @@ class TodoListActivity : AppCompatActivity() {
             val repository = RoomTaskRepository(TaskRoomDatabase.fetchDatabase(this))
             TodoListViewModel(repository, Schedulers.io(), Schedulers.computation())
         }
+
+        val swipeToRemoveHelper = SwipeToRemoveHelper(adapter)
+        ItemTouchHelper(swipeToRemoveHelper).attachToRecyclerView(binding.todoList)
+
+        swipeToRemoveHelper.swipeStream.subscribe {
+            viewModel.taskSwiped(it)
+        }.addTo(disposables)
 
         binding.addButton.clicks()
             .subscribe { viewModel.addClicked() }

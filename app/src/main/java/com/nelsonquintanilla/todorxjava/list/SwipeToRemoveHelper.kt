@@ -20,19 +20,21 @@ class SwipeToRemoveHelper(private val adapter: TodoAdapter) :
     }
 
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-//    val position = viewHolder.adapterPosition
-//    val item = adapter.getListItem(position) as TodoListItem.TaskListItem
-//    swipeSubject.onNext(item.task)
+        val position = viewHolder.bindingAdapterPosition
+        val item = adapter.getListItem(position) as TodoListItem.TaskListItem
+        swipeSubject.onNext(item.taskItem)
     }
 
-    override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
-//    val position = viewHolder.adapterPosition
-//    val item = adapter.getListItem(position)
-//    return if (item is TodoListItem.TaskListItem) {
-//      makeMovementFlags(0, ItemTouchHelper.START or ItemTouchHelper.END)
-//    } else {
-//      makeMovementFlags(0, 0)
-//    }
-        return 0
+    override fun getMovementFlags(
+        recyclerView: RecyclerView,
+        viewHolder: RecyclerView.ViewHolder
+    ): Int {
+        val position = viewHolder.bindingAdapterPosition
+        val item = adapter.getListItem(position)
+        return if (item is TodoListItem.TaskListItem) {
+            makeMovementFlags(0, ItemTouchHelper.START or ItemTouchHelper.END)
+        } else {
+            makeMovementFlags(0, 0)
+        }
     }
 }

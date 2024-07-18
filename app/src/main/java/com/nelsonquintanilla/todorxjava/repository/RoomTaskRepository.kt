@@ -29,4 +29,8 @@ class RoomTaskRepository(private val database: TaskDatabase) : TaskRepository {
     override fun taskStream(): Observable<List<TaskItem>> {
         return database.taskDao().taskStream()
     }
+
+    override fun deleteTask(taskItem: TaskItem): Single<Int> {
+        return database.taskDao().deleteTask(taskItem = taskItem)
+    }
 }

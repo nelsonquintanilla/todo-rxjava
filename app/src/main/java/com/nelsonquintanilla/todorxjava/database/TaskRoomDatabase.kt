@@ -29,31 +29,31 @@ object TaskRoomDatabase {
                             listOf(
                                 TaskItem(
                                     id = null,
-                                    text = "Chapter 1: Hello, RxJava!",
+                                    text = "Task 1: Buy groceries",
                                     addedDate = Date(),
                                     isDone = false
                                 ),
                                 TaskItem(
                                     id = null,
-                                    text = "Chapter 2: Observables",
+                                    text = "Task 2: Call the bank",
                                     addedDate = Date(),
                                     isDone = false
                                 ),
                                 TaskItem(
                                     id = null,
-                                    text = "Chapter 3: Subjects",
+                                    text = "Task 3: Finish project report",
                                     addedDate = Date(),
                                     isDone = false
                                 ),
                                 TaskItem(
                                     id = null,
-                                    text = "Chapter 4: Observables and Subjects in practice",
+                                    text = "Task 4: Schedule meeting",
                                     addedDate = Date(),
                                     isDone = false
                                 ),
                                 TaskItem(
                                     id = null,
-                                    text = "Chapter 5: Filtering operators",
+                                    text = "Task 5: Read a book",
                                     addedDate = Date(),
                                     isDone = false
                                 ),

@@ -21,9 +21,9 @@ class TodoListViewModel(
 
     private val disposables = CompositeDisposable()
     private val taskClicks = PublishSubject.create<TaskItem>()
-    private val taskDoneToggles =
-        PublishSubject.create<Pair<TaskItem, Boolean>>() // Observable listening for a tap on any of the task items
+    private val taskDoneToggles = PublishSubject.create<Pair<TaskItem, Boolean>>() // Observable listening for a tap on any of the task items
     private val addClicks = PublishSubject.create<Unit>()
+    private val taskSwipes = PublishSubject.create<TaskItem>()
 
     // Int represents the id of the task item to be edited. It's best practice to pass around the
     // smallest piece of data possible between 2 activities so that the maximum amount of information
@@ -80,6 +80,16 @@ class TodoListViewModel(
                 showEditTaskLiveData.postValue(INVALID_ID)
             }
             .addTo(disposables)
+
+        // Indicate that the task has been swiped and delete it from the database
+        taskSwipes
+            .flatMapSingle { task ->
+                repository
+                    .deleteTask(task.copy(id = task.id))
+                    .subscribeOn(backgroundScheduler)
+            }
+            .subscribe()
+            .addTo(disposables)
     }
 
     // Methods to forward events into PublishSubjects
@@ -93,6 +103,10 @@ class TodoListViewModel(
 
     fun addClicked() {
         addClicks.onNext(Unit)
+    }
+
+    fun taskSwiped(taskItem: TaskItem) {
+        taskSwipes.onNext(taskItem)
     }
 
     override fun onCleared() {
