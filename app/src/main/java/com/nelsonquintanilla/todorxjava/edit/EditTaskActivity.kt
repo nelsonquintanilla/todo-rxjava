@@ -10,7 +10,7 @@ import com.nelsonquintanilla.todorxjava.utils.buildViewModel
 class EditTaskActivity : AppCompatActivity() {
 
     companion object {
-        const val TASK_ID_KEY = "taskIdKey"
+        private const val TASK_ID_KEY = "taskIdKey"
         fun launch(context: Context, taskId: Int) {
             val intent = Intent(context, EditTaskActivity::class.java)
             intent.putExtra(TASK_ID_KEY, taskId)

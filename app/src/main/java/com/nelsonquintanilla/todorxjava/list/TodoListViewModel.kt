@@ -8,15 +8,23 @@ import io.reactivex.rxjava3.core.Scheduler
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.subjects.PublishSubject
+import java.util.concurrent.TimeUnit
 
 class TodoListViewModel(
     repository: RoomTaskRepository,
     backgroundScheduler: Scheduler,
+    // Best practice: pass in dedicated Scheduler to use for timing tasks, that way it's possible to
+    // advance time manually using a TestScheduler in unit tests
+    computationScheduler: Scheduler,
 ) : ViewModel() {
 
-    private val disposables = CompositeDisposable()
     val listItemsLiveData = MutableLiveData<List<TodoListItem>>()
+    // Int represents the id of the task item to be edited. It's best practice to pass around the
+    // smallest piece of data possible between 2 activities so that the maximum amount of information
+    // an intent can carry is not exceeded.
+    val showEditTaskLiveData = MutableLiveData<Int>()
 
+    private val disposables = CompositeDisposable()
     private val taskClicks = PublishSubject.create<TaskItem>()
     private val taskDoneToggles = PublishSubject.create<Pair<TaskItem, Boolean>>() // Observable listening for a tap on any of the task items
 
@@ -38,6 +46,7 @@ class TodoListViewModel(
             .subscribe(listItemsLiveData::postValue)
             .addTo(disposables)
 
+        // Save updated version of the TaskItem the user toggled
         taskDoneToggles
             // flatMapSingle because flatMap expects the lambda to produce an Observable, but
             // repository.insertTask produces a Single
@@ -47,6 +56,18 @@ class TodoListViewModel(
                     .subscribeOn(backgroundScheduler)
             }
             .subscribe()
+            .addTo(disposables)
+
+        // Indicate that the activity should launch the edit task activity
+        taskClicks
+            // To ensure that only 1 tap goes through: immediately emits an item and then skips any
+            // new items that come within the designated time period. Ensures that multiple activities
+            // aren't started by quickly tapping on a task.
+            .throttleFirst(1, TimeUnit.SECONDS, computationScheduler)
+            .subscribe {
+                val id = it.id ?: RoomTaskRepository.INVALID_ID
+                showEditTaskLiveData.postValue(id)
+            }
             .addTo(disposables)
     }
 

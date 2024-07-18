@@ -6,6 +6,7 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.nelsonquintanilla.todorxjava.database.TaskRoomDatabase
 import com.nelsonquintanilla.todorxjava.databinding.ActivityTodoListBinding
+import com.nelsonquintanilla.todorxjava.edit.EditTaskActivity
 import com.nelsonquintanilla.todorxjava.repository.RoomTaskRepository
 import com.nelsonquintanilla.todorxjava.utils.buildViewModel
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -29,7 +30,7 @@ class TodoListActivity : AppCompatActivity() {
 
         val viewModel = buildViewModel {
             val repository = RoomTaskRepository(TaskRoomDatabase.fetchDatabase(this))
-            TodoListViewModel(repository, Schedulers.io())
+            TodoListViewModel(repository, Schedulers.io(), Schedulers.computation())
         }
 
         viewModel.listItemsLiveData
@@ -46,5 +47,9 @@ class TodoListActivity : AppCompatActivity() {
         adapter.taskToggledStream.subscribe {
             viewModel.taskDoneToggled(it.first, it.second)
         }.addTo(disposables)
+
+        viewModel.showEditTaskLiveData.observe(this, Observer {
+            EditTaskActivity.launch(context = this, taskId = it)
+        })
     }
 }
