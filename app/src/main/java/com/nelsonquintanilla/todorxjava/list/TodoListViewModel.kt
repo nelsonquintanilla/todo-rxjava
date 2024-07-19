@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import com.nelsonquintanilla.todorxjava.model.TaskItem
 import com.nelsonquintanilla.todorxjava.repository.RoomTaskRepository.Companion.INVALID_ID
 import com.nelsonquintanilla.todorxjava.repository.TaskRepository
+import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Scheduler
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
@@ -12,11 +13,11 @@ import io.reactivex.rxjava3.subjects.PublishSubject
 import java.util.concurrent.TimeUnit
 
 class TodoListViewModel(
-    repository: TaskRepository,
-    backgroundScheduler: Scheduler,
+    private val repository: TaskRepository,
+    private val backgroundScheduler: Scheduler,
     // Best practice: pass in dedicated Scheduler to use for timing tasks, that way it's possible to
     // advance time manually using a TestScheduler in unit tests
-    computationScheduler: Scheduler,
+    private val computationScheduler: Scheduler,
 ) : ViewModel() {
 
     private val disposables = CompositeDisposable()
@@ -33,35 +34,53 @@ class TodoListViewModel(
     val statisticsLiveData = MutableLiveData<Pair<Int, Int>>()
 
     init {
+        initializeStreams()
+    }
+
+    private fun initializeStreams() {
         val taskStream = repository.taskStream().cache()
 
+        observeTaskListUpdates(taskStream)
+        observeStatisticsUpdates(taskStream)
+        handleTaskDoneToggles()
+        handleTaskClicks()
+        handleAddClicks()
+        handleTaskSwipes()
+    }
+
+    private fun observeTaskListUpdates(taskStream: Observable<List<TaskItem>>) {
         taskStream // Observable<List<TaskItem>>
             .map { tasks -> tasks.map { TodoListItem.TaskListItem(it) } } // List<TodoListItem.TaskListItem>
-            .map { listItems ->
-                val finishedTasks = listItems.filter { it.taskItem.isDone }
-                val todoTasks = listItems - finishedTasks.toSet()
-                listOf(
-                    TodoListItem.DueTasks,
-                    *todoTasks.toTypedArray(),
-                    TodoListItem.DoneTasks,
-                    *finishedTasks.toTypedArray()
-                )
-            }
+            .map { listItems -> createSortedTaskList(listItems) }
             .subscribeOn(backgroundScheduler)
             .subscribe(listItemsLiveData::postValue)
             .addTo(disposables)
+    }
 
+    private fun createSortedTaskList(listItems: List<TodoListItem.TaskListItem>): List<TodoListItem> {
+        val (doneTasks, dueTasks) = listItems.partition { it.taskItem.isDone }
+        return listOf(TodoListItem.DueTasks) +
+                dueTasks +
+                listOf(TodoListItem.DoneTasks) +
+                doneTasks
+    }
+
+    private fun observeStatisticsUpdates(taskStream: Observable<List<TaskItem>>) {
         taskStream
             .map { tasks -> tasks.map { TodoListItem.TaskListItem(it) } }
-            .map { listItems ->
-                val numberDoneTasks = listItems.filter { it.taskItem.isDone }.size
-                val numberDueTasks = listItems.size - numberDoneTasks
-                Pair(numberDoneTasks, numberDueTasks)
-            }
+            .map { listItems -> calculateTaskStatistics(listItems) }
             .subscribeOn(backgroundScheduler)
             .subscribe(statisticsLiveData::postValue)
             .addTo(disposables)
+    }
 
+    private fun calculateTaskStatistics(listItems: List<TodoListItem.TaskListItem>): Pair<Int, Int> {
+        val numberDoneTasks = listItems.count { it.taskItem.isDone }
+        val numberDueTasks = listItems.size - numberDoneTasks
+        return Pair(numberDoneTasks, numberDueTasks)
+    }
+
+    private fun handleTaskDoneToggles() {
         // Save updated version of the TaskItem the user toggled
         taskDoneToggles
             // flatMapSingle because flatMap expects the lambda to produce an Observable, but
@@ -73,7 +92,9 @@ class TodoListViewModel(
             }
             .subscribe()
             .addTo(disposables)
+    }
 
+    private fun handleTaskClicks() {
         // Indicate that the activity should launch the edit task activity
         taskClicks
             // To ensure that only 1 tap goes through: immediately emits an item and then skips any
@@ -85,7 +106,9 @@ class TodoListViewModel(
                 showEditTaskLiveData.postValue(id)
             }
             .addTo(disposables)
+    }
 
+    private fun handleAddClicks() {
         // Indicate that the add button was clicked and show Edit Task Activity
         addClicks
             .throttleFirst(1, TimeUnit.SECONDS, computationScheduler)
@@ -93,7 +116,9 @@ class TodoListViewModel(
                 showEditTaskLiveData.postValue(INVALID_ID)
             }
             .addTo(disposables)
+    }
 
+    private fun handleTaskSwipes() {
         // Indicate that the task has been swiped and delete it from the database
         taskSwipes
             .flatMapSingle { task ->
@@ -106,21 +131,12 @@ class TodoListViewModel(
     }
 
     // Methods to forward events into PublishSubjects
-    fun taskClicked(taskItem: TaskItem) {
-        taskClicks.onNext(taskItem)
-    }
-
-    fun taskDoneToggled(taskItem: TaskItem, on: Boolean) {
+    fun taskClicked(taskItem: TaskItem) = taskClicks.onNext(taskItem)
+    fun taskDoneToggled(taskItem: TaskItem, on: Boolean) =
         taskDoneToggles.onNext(Pair(taskItem, on))
-    }
 
-    fun addClicked() {
-        addClicks.onNext(Unit)
-    }
-
-    fun taskSwiped(taskItem: TaskItem) {
-        taskSwipes.onNext(taskItem)
-    }
+    fun addClicked() = addClicks.onNext(Unit)
+    fun taskSwiped(taskItem: TaskItem) = taskSwipes.onNext(taskItem)
 
     override fun onCleared() {
         super.onCleared()
