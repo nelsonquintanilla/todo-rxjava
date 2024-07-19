@@ -1,5 +1,5 @@
 ## RxJava Todo App
-<img src="https://github.com/nelsonquintanilla/todo-rxjava/blob/main/todo_rxjava_demo.gif" width="400" alt="Todo RxJava Demo">
+<img src="https://github.com/nelsonquintanilla/todo-rxjava/blob/main/todo_rxjava_demo.gif" width="30%" alt="Todo RxJava Demo">
 
 ## Overview
 This Todo app serves as a modern equivalent of the "Hello, World" program, designed to expose the inner structure of an Rx application. It's a complete RxJava app that illustrates Reactive Programming with Kotlin and RxJava in Android development.
