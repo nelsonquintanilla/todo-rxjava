@@ -1,5 +1,5 @@
 ## RxJava Todo App
-<img src="https://github.com/nelsonquintanilla/todo-rxjava/blob/main/todo_rxjava_demo.gif" width="50%" alt="Todo RxJava Demo">
+<img src="https://github.com/nelsonquintanilla/todo-rxjava/blob/main/todo_rxjava_demo.gif" width="400" alt="Todo RxJava Demo">
 
 ## Overview
 This Todo app serves as a modern equivalent of the "Hello, World" program, designed to expose the inner structure of an Rx application. It's a complete RxJava app that illustrates Reactive Programming with Kotlin and RxJava in Android development.
@@ -8,9 +8,9 @@ This Todo app serves as a modern equivalent of the "Hello, World" program, desig
 While Kotlin Coroutines have gained popularity for asynchronous programming in Android, there's still a significant number of legacy projects that use RxJava. This project aims to provide developers with a comprehensive, up-to-date example of how to use RxJava with Kotlin in a real-world scenario.
 Learning RxJava through this project can be beneficial for several reasons:
 
-Many existing projects still use RxJava, and understanding it is crucial for maintaining and improving these codebases.
-RxJava offers a different paradigm for handling asynchronous operations, which can broaden a developer's toolkit.
-There's a lack of resources showing complete, modern apps using RxJava with Kotlin, making this project a valuable learning tool.
+* Many existing projects still use RxJava, and understanding it is crucial for maintaining and improving these codebases.
+* RxJava offers a different paradigm for handling asynchronous operations, which can broaden a developer's toolkit.
+* There's a lack of resources showing complete, modern apps using RxJava with Kotlin, making this project a valuable learning tool.
 
 ## Architecture
 This app uses a modularized architecture that separates the data layer from the presentation layer. The primary goal is to achieve a clean separation between the user interface, business logic, and services.
@@ -23,12 +23,12 @@ This app uses a modularized architecture that separates the data layer from the 
 The app follows the MVVM (Model-View-ViewModel) pattern, which allows for a clean separation of concerns and makes the codebase more maintainable and testable.
 
 ### Libraries Used
-* ViewModel: For managing UI-related data in a lifecycle-conscious way.
-* LiveData: For building data objects that notify views of database changes.
-* Room: Provides an abstraction layer over SQLite for robust database access.
-* RxJava: For composing asynchronous and event-based programs using observable sequences.
-* RxAndroid: Provides Android-specific bindings for RxJava.
-* RxBinding: Provides RxJava binding APIs for Android UI widgets.
+* **ViewModel**: For managing UI-related data in a lifecycle-conscious way.
+* **LiveData**: For building data objects that notify views of database changes.
+* **Room**: Provides an abstraction layer over SQLite for robust database access.
+* **RxJava**: For composing asynchronous and event-based programs using observable sequences.
+* **RxAndroid**: Provides Android-specific bindings for RxJava.
+* **RxBinding**: Provides RxJava binding APIs for Android UI widgets.
 
 ## Features
 * Add, edit, and delete tasks
