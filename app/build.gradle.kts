@@ -48,7 +48,6 @@ dependencies {
     implementation(libs.rxkotlin)
     implementation(libs.rxandroid)
     implementation(libs.rxjava)
-//    implementation(libs.rxjava3.bridge)
     implementation(libs.rxbinding)
 
     implementation(libs.androidx.room.runtime)

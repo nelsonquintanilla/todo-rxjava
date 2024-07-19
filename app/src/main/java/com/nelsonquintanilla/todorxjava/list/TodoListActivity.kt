@@ -1,11 +1,13 @@
 package com.nelsonquintanilla.todorxjava.list
 
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.jakewharton.rxbinding4.view.clicks
+import com.nelsonquintanilla.todorxjava.R
 import com.nelsonquintanilla.todorxjava.database.TaskRoomDatabase
 import com.nelsonquintanilla.todorxjava.databinding.ActivityTodoListBinding
 import com.nelsonquintanilla.todorxjava.edit.EditTaskActivity
@@ -42,9 +44,16 @@ class TodoListActivity : AppCompatActivity() {
             viewModel.taskSwiped(it)
         }.addTo(disposables)
 
+        binding.statistics.visibility = View.VISIBLE
+
         binding.addButton.clicks()
             .subscribe { viewModel.addClicked() }
             .addTo(disposables)
+
+        viewModel.statisticsLiveData
+            .observe(this, Observer {
+                binding.statistics.text = getString(R.string.statistics_information, it.first, it.second)
+            })
 
         viewModel.listItemsLiveData
             .observe(this, Observer(adapter::submitList))

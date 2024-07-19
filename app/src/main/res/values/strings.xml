@@ -5,4 +5,5 @@
     <string name="title">Title</string>
     <string name="edit">Edit</string>
     <string name="invalid_title">Invalid Title</string>
+    <string name="statistics_information">%1$d Done Tasks, %2$d Due Tasks</string>
 </resources>

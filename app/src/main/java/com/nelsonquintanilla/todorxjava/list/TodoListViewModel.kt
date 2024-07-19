@@ -21,7 +21,7 @@ class TodoListViewModel(
 
     private val disposables = CompositeDisposable()
     private val taskClicks = PublishSubject.create<TaskItem>()
-    private val taskDoneToggles = PublishSubject.create<Pair<TaskItem, Boolean>>() // Observable listening for a tap on any of the task items
+    private val taskDoneToggles = PublishSubject.create<Pair<TaskItem, Boolean>>()
     private val addClicks = PublishSubject.create<Unit>()
     private val taskSwipes = PublishSubject.create<TaskItem>()
 
@@ -30,10 +30,12 @@ class TodoListViewModel(
     // an intent can carry is not exceeded.
     val showEditTaskLiveData = MutableLiveData<Int>()
     val listItemsLiveData = MutableLiveData<List<TodoListItem>>()
+    val statisticsLiveData = MutableLiveData<Pair<Int, Int>>()
 
     init {
-        repository
-            .taskStream() // Observable<List<TaskItem>>
+        val taskStream = repository.taskStream().cache()
+
+        taskStream // Observable<List<TaskItem>>
             .map { tasks -> tasks.map { TodoListItem.TaskListItem(it) } } // List<TodoListItem.TaskListItem>
             .map { listItems ->
                 val finishedTasks = listItems.filter { it.taskItem.isDone }
@@ -47,6 +49,17 @@ class TodoListViewModel(
             }
             .subscribeOn(backgroundScheduler)
             .subscribe(listItemsLiveData::postValue)
+            .addTo(disposables)
+
+        taskStream
+            .map { tasks -> tasks.map { TodoListItem.TaskListItem(it) } }
+            .map { listItems ->
+                val numberDoneTasks = listItems.filter { it.taskItem.isDone }.size
+                val numberDueTasks = listItems.size - numberDoneTasks
+                Pair(numberDoneTasks, numberDueTasks)
+            }
+            .subscribeOn(backgroundScheduler)
+            .subscribe(statisticsLiveData::postValue)
             .addTo(disposables)
 
         // Save updated version of the TaskItem the user toggled
